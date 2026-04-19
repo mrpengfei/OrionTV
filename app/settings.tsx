@@ -203,6 +203,19 @@ export default function SettingsScreen() {
       ),
       key: "livestream",
     },
+    deviceType !== "mobile" && {
+      component: (
+        <VideoProxySection
+          ref={videoProxySectionRef}
+          onChanged={markAsChanged}
+          onFocus={() => {
+            setCurrentFocusIndex(3);
+            setCurrentSection("videoProxy");
+          }}
+        />
+      ),
+      key: "videoProxy",
+    },
     Platform.OS === "android" && {
       component: <UpdateSection />,
       key: "update",

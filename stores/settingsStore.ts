@@ -51,8 +51,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     sources: {},
   },
   videoProxy: {
-    enabled: true,
-    serverUrl: "http://172.29.203.44:8080/proxy/m3u8.m3u8",
+    enabled: false,
+    serverUrl: "",
   },
   loadSettings: async () => {
     const settings = await SettingsManager.get();
@@ -65,8 +65,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         sources: {},
       },
       videoProxy: settings.videoProxy || {
-        enabled: true,
-        serverUrl: "http://172.29.203.44:8080/proxy/m3u8.m3u8",
+        enabled: false,
+        serverUrl: "",
       },
     });
     if (settings.apiBaseUrl) {
@@ -122,7 +122,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       remoteInputEnabled,
       videoSource,
       videoProxy: {
-        enabled: videoProxy.enabled,
+        enabled: !!videoProxy.serverUrl,
         serverUrl: videoProxy.serverUrl.trim(),
       },
     });

@@ -412,13 +412,13 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       get()._savePlayRecord();
       
       // 检测是否达到70%进度，自动缓存下一集
-      if (progressPosition > 0.7 && currentEpisodeIndex < episodes.length - 1) {
-        const nextEpisodeIndex = currentEpisodeIndex + 1;
-        const nextEpisodeUrl = episodes[nextEpisodeIndex]?.url;
-        if (nextEpisodeUrl) {
-          videoProxy.preCacheVideo(nextEpisodeUrl);
-        }
-      }
+      // if (progressPosition > 0.7 && currentEpisodeIndex < episodes.length - 1) {
+      //   const nextEpisodeIndex = currentEpisodeIndex + 1;
+      //   const nextEpisodeUrl = episodes[nextEpisodeIndex]?.url;
+      //   if (nextEpisodeUrl) {
+      //     videoProxy.preCacheVideo(nextEpisodeUrl);
+      //   }
+      // }
 
       const isNearEnd = progressPosition > 0.95;
       if (isNearEnd && currentEpisodeIndex < episodes.length - 1 && !outroStartTime) {
