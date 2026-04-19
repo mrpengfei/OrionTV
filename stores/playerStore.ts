@@ -5,6 +5,7 @@ import { RefObject } from "react";
 import { PlayRecord, PlayRecordManager, PlayerSettingsManager } from "@/services/storage";
 import useDetailStore, { episodesSelectorBySource } from "./detailStore";
 import Logger from '@/utils/Logger';
+import videoProxy from '@/services/videoProxy';
 
 const logger = Logger.withTag('PlayerStore');
 
@@ -209,7 +210,7 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       
       const episodesMappingStart = performance.now();
       const mappedEpisodes = episodes.map((ep, index) => ({
-        url: ep,
+        url: videoProxy.getProxyUrl(ep),
         title: `第 ${index + 1} 集`,
       }));
       const episodesMappingEnd = performance.now();
@@ -394,6 +395,7 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
 
     const { currentEpisodeIndex, episodes, outroStartTime, playEpisode } = get();
     const detail = useDetailStore.getState().detail;
+    const progressPosition = newStatus.durationMillis ? newStatus.positionMillis / newStatus.durationMillis : 0;
 
     if (
       outroStartTime &&
@@ -408,8 +410,17 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
 
     if (detail && newStatus.durationMillis) {
       get()._savePlayRecord();
+      
+      // 检测是否达到70%进度，自动缓存下一集
+      if (progressPosition > 0.7 && currentEpisodeIndex < episodes.length - 1) {
+        const nextEpisodeIndex = currentEpisodeIndex + 1;
+        const nextEpisodeUrl = episodes[nextEpisodeIndex]?.url;
+        if (nextEpisodeUrl) {
+          videoProxy.preCacheVideo(nextEpisodeUrl);
+        }
+      }
 
-      const isNearEnd = newStatus.positionMillis / newStatus.durationMillis > 0.95;
+      const isNearEnd = progressPosition > 0.95;
       if (isNearEnd && currentEpisodeIndex < episodes.length - 1 && !outroStartTime) {
         set({ showNextEpisodeOverlay: true });
       } else {
@@ -423,7 +434,6 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       }
     }
 
-    const progressPosition = newStatus.durationMillis ? newStatus.positionMillis / newStatus.durationMillis : 0;
     set({ status: newStatus, progressPosition });
   },
 
@@ -512,7 +522,7 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       const newEpisodes = fallbackSource.episodes || [];
       if (newEpisodes.length > currentEpisodeIndex) {
         const mappedEpisodes = newEpisodes.map((ep, index) => ({
-          url: ep,
+          url: videoProxy.getProxyUrl(ep),
           title: `第 ${index + 1} 集`,
         }));
         

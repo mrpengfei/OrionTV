@@ -39,6 +39,10 @@ export interface AppSettings {
     };
   };
   m3uUrl: string;
+  videoProxy: {
+    enabled: boolean;
+    serverUrl: string;
+  };
 }
 
 export interface LoginCredentials {
@@ -322,6 +326,10 @@ export class SettingsManager {
         sources: {},
       },
       m3uUrl: "",
+    videoProxy: {
+      enabled: true,
+      serverUrl: "http://172.29.203.44:8080/proxy/m3u8.m3u8",
+    },
     };
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);

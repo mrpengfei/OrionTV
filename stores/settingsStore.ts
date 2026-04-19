@@ -17,6 +17,10 @@ interface SettingsState {
       [key: string]: boolean;
     };
   };
+  videoProxy: {
+    enabled: boolean;
+    serverUrl: string;
+  };
   isModalVisible: boolean;
   serverConfig: ServerConfig | null;
   isLoadingServerConfig: boolean;
@@ -27,6 +31,9 @@ interface SettingsState {
   setRemoteInputEnabled: (enabled: boolean) => void;
   saveSettings: () => Promise<void>;
   setVideoSource: (config: { enabledAll: boolean; sources: { [key: string]: boolean } }) => void;
+  setVideoProxy: (config: { enabled: boolean; serverUrl: string }) => void;
+  setVideoProxyEnabled: (enabled: boolean) => void;
+  setVideoProxyServerUrl: (serverUrl: string) => void;
   showModal: () => void;
   hideModal: () => void;
 }
@@ -43,6 +50,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     enabledAll: true,
     sources: {},
   },
+  videoProxy: {
+    enabled: true,
+    serverUrl: "http://172.29.203.44:8080/proxy/m3u8.m3u8",
+  },
   loadSettings: async () => {
     const settings = await SettingsManager.get();
     set({
@@ -52,6 +63,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       videoSource: settings.videoSource || {
         enabledAll: true,
         sources: {},
+      },
+      videoProxy: settings.videoProxy || {
+        enabled: true,
+        serverUrl: "http://172.29.203.44:8080/proxy/m3u8.m3u8",
       },
     });
     if (settings.apiBaseUrl) {
@@ -79,7 +94,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setRemoteInputEnabled: (enabled) => set({ remoteInputEnabled: enabled }),
   setVideoSource: (config) => set({ videoSource: config }),
   saveSettings: async () => {
-    const { apiBaseUrl, m3uUrl, remoteInputEnabled, videoSource } = get();
+    const { apiBaseUrl, m3uUrl, remoteInputEnabled, videoSource, videoProxy } = get();
     const currentSettings = await SettingsManager.get()
     const currentApiBaseUrl = currentSettings.apiBaseUrl;
     let processedApiBaseUrl = apiBaseUrl.trim();
@@ -106,6 +121,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       m3uUrl,
       remoteInputEnabled,
       videoSource,
+      videoProxy: {
+        enabled: videoProxy.enabled,
+        serverUrl: videoProxy.serverUrl.trim(),
+      },
     });
     if ( currentApiBaseUrl !== processedApiBaseUrl) {
       await AsyncStorage.setItem('authCookies', '');
@@ -115,6 +134,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ isModalVisible: false, apiBaseUrl: processedApiBaseUrl });
     await get().fetchServerConfig();
   },
+  setVideoProxy: (config) => set({ videoProxy: config }),
+  setVideoProxyEnabled: (enabled) =>
+    set((state) => ({ videoProxy: { ...state.videoProxy, enabled } })),
+  setVideoProxyServerUrl: (serverUrl) =>
+    set((state) => ({ videoProxy: { ...state.videoProxy, serverUrl } })),
   showModal: () => set({ isModalVisible: true }),
   hideModal: () => set({ isModalVisible: false }),
 }));

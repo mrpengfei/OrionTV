@@ -13,6 +13,7 @@ import { APIConfigSection } from "@/components/settings/APIConfigSection";
 import { LiveStreamSection } from "@/components/settings/LiveStreamSection";
 import { RemoteInputSection } from "@/components/settings/RemoteInputSection";
 import { UpdateSection } from "@/components/settings/UpdateSection";
+import { VideoProxySection } from "@/components/settings/VideoProxySection";
 // import { VideoSourceSection } from "@/components/settings/VideoSourceSection";
 import Toast from "react-native-toast-message";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
@@ -53,6 +54,7 @@ export default function SettingsScreen() {
   const saveButtonRef = useRef<any>(null);
   const apiSectionRef = useRef<any>(null);
   const liveStreamSectionRef = useRef<any>(null);
+  const videoProxySectionRef = useRef<any>(null);
 
   useEffect(() => {
     loadSettings();
@@ -76,6 +78,9 @@ export default function SettingsScreen() {
     } else if (currentSection === "livestream" && liveStreamSectionRef.current) {
       // Live Stream Section
       setM3uUrl(message);
+    } else if (currentSection === "videoProxy" && videoProxySectionRef.current) {
+      // Video Proxy Section
+      videoProxySectionRef.current.setInputValue(message);
     }
   };
 
